@@ -13,12 +13,11 @@ data.py로 읽기 → v1.py가 풀기 → check.py가 재기 → show.py가 표�
 | 파일 | 무엇인가 | 누가 쓰나 |
 |---|---|---|
 | AGENTS.md | Codex가 작업 전에 자동으로 읽는 규칙서. 폴더 규칙, ingest 절차, 버전 규칙, 자동 기록, 보고 형식. 맨 위 "목표" 칸은 시험장에서 채운다 | 나 (목표 칸) |
-| README.md | 문제에서 주어지는 설명서 자리. 시험에서 받은 README로 바꾼다 | 문제 제공 |
+| README.md | 템플릿에는 없다. 시험에서 받은 문제 README.md를 맨 위 폴더에 둔다 | 문제 제공 |
 | GUIDE.md | 이 파일. 파일 설명서 | - |
 | chat.md | 담당자 대화 **원본**. 대화가 끝날 때마다 `## #2`, `## #3`처럼 번호를 붙여 그대로 붙여넣는다. 고치지 않는다 | 나 (붙여넣기) |
-| KNOWLEDGE.md | README와 chat.md에서 뽑아낸 **정리본**. 목적, 이용자, 입력 데이터, 필수 규칙, 숫자, 범위 밖, 담당자 재량, 충돌하는 요구, 물어볼 질문. 항목마다 출처 [README] [chat#2] | AI (`ingest` 때) |
+| INFO.md | README와 chat.md에서 뽑아낸 **정리본**. 목적, 이용자, 입력 데이터, 필수 규칙, 숫자, 범위 밖, 담당자 재량, 충돌하는 요구, 물어볼 질문. 항목마다 출처 [README] [chat#2] | AI (`ingest` 때) |
 | LOG.md | 버전마다 한 블록: 무엇을 / 왜 / 왜 이 방법 / 어떻게 검증 / 믿을 수 있나. AI 제안을 내가 고친 기록, 설계 결정, 한계. **서술형 답안의 재료** | AI (버전마다) |
-| test_core.py | 테스트 자리 3개: 손계산, 틀린 결과를 잡는가, 맞는 결과를 통과시키는가. 채우지 않고 skip만 지우면 일부러 실패한다 | AI (기대값은 내가 계산) |
 
 ## 2. core/: 핵심 전략
 | 파일 | 무엇인가 | 시험장에서 |
@@ -42,20 +41,20 @@ data.py로 읽기 → v1.py가 풀기 → check.py가 재기 → show.py가 표�
 | 파일 | 무엇인가 |
 |---|---|
 | data/README.txt | 문제 데이터를 여기 두고 고치지 말라는 안내 |
-| requirements.txt | fastapi(서버), uvicorn(서버 실행기), pytest(테스트) |
+| requirements.txt | fastapi(서버), uvicorn(서버 실행기) |
 | .gitignore | git에 올리지 않을 파일 (임시 파일, 비밀값 .env) |
 
 ## 시험장 사용법
 1. `pip install -r requirements.txt`
-2. 문제 README.md, 데이터를 data/에 넣기 → Codex에게 `ingest` (KNOWLEDGE.md 생성)
+2. 문제 README.md는 맨 위 폴더에, 데이터는 data/에 넣기 → Codex에게 `ingest` (INFO.md 생성)
 3. AGENTS.md 목표 칸 채우기 → v1(가장 쉬운 버전)부터 화면까지 완성: `python web/app.py`
 4. 담당자와 대화 → chat.md에 붙여넣기 → `ingest` → v2 만들기 → '전체 버전 비교'로 숫자 확인
 5. 3~4 반복. LOG.md는 버전마다 자동으로 쌓인다
-6. 끝나기 전에 LOG.md와 KNOWLEDGE.md를 읽으며 "왜 이렇게 만들었나 / 왜 골랐나 / 어떻게 검증했나"를 내 말로 정리
+6. 끝나기 전에 LOG.md와 INFO.md를 읽으며 "왜 이렇게 만들었나 / 왜 골랐나 / 어떻게 검증했나"를 내 말로 정리
 
 | 손대는 사람 | 파일 |
 |---|---|
-| 내가 직접 | AGENTS.md 목표 칸, chat.md, 손계산 기대값 |
-| AI가 채움 | core/의 rules·data·v1·check·show, v2·v3…, test_core.py |
-| AI가 자동 기록 | KNOWLEDGE.md, LOG.md |
+| 내가 직접 | AGENTS.md 목표 칸, chat.md |
+| AI가 채움 | core/의 rules·data·v1·check·show, v2·v3… |
+| AI가 자동 기록 | INFO.md, LOG.md |
 | 손대지 않음 | core/run.py, web/ |

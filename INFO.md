@@ -1,4 +1,4 @@
-# KNOWLEDGE.md — 문제에 대해 알게 된 것
+# INFO.md — 문제에 대해 알게 된 정보
 
 > `ingest` 때 AI가 README.md와 chat.md를 읽고 이 문서를 갱신한다. 사람이 직접 고쳐도 된다.
 > 모든 항목에 출처를 단다: [README], [chat#번호], [가정]
