@@ -5,7 +5,7 @@
 - 사용자: [누가, 어떤 상황에서 쓰나]
 - 필수 기능: [1~3개]
 - 범위 밖: [하지 않을 것]
-- 문제 설명은 README.md, 담당자 대화 원본은 chat.md, 정리된 지식은 KNOWLEDGE.md, 버전 기록은 LOG.md
+- 문제 설명은 README.md, 담당자 대화 원본은 chat.md, 정리된 지식은 KNOWLEDGE.md, 버전 기록은 LOG.md, 파일 설명은 GUIDE.md
 
 ## 사용자 프로필
 - 사용자는 웹개발 경험이 거의 없다. Python은 읽을 수 있다.
