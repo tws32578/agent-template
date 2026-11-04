@@ -1,0 +1,89 @@
+<!doctype html>
+<!-- [고정] 화면. 버전 선택 → 서버에 요청(fetch) → 받은 JSON을 그린다. 계산은 하지 않는다. -->
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<title>결과 화면</title>
+<style>
+  body { font-family: system-ui, "Malgun Gothic", sans-serif; margin: 24px; color: #222; max-width: 1100px; }
+  h2 { font-size: 15px; margin: 22px 0 8px; }
+  button, select { font-size: 14px; padding: 6px 12px; margin-right: 6px; }
+  table { border-collapse: collapse; font-size: 13px; margin-top: 6px; }
+  td, th { border: 1px solid #ddd; padding: 4px 10px; text-align: left; }
+  th { background: #f4f5f7; }
+  .ok { color: #1b7f3b; } .bad { color: #b00020; } .muted { color: #777; font-size: 12px; }
+  .box { white-space: pre-wrap; background: #fdecec; color: #a40000; padding: 8px; border-radius: 6px; }
+  tr.click:hover { background: #f3f7ff; cursor: pointer; }
+</style>
+</head>
+<body>
+  <h1>결과 화면</h1>
+
+  <h2>규칙 <span class="muted">(core/rules.py)</span></h2>
+  <table id="rules"></table>
+
+  <h2>실행</h2>
+  <select id="version"></select>
+  <button onclick="runOne()">실행</button>
+  <button onclick="compareAll()">전체 버전 비교</button>
+  <span id="note" class="muted"></span>
+
+  <div id="compareArea"></div>
+  <div id="result"></div>
+
+<script>
+// [용어] fetch: 서버 주소로 요청을 보내는 함수 / await: 응답이 올 때까지 기다림
+const $ = (id) => document.getElementById(id);
+const esc = (v) => String(v ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+let versions = [];
+
+async function init() {
+  const info = await (await fetch("/api/info")).json();
+  versions = info.versions;
+  $("rules").innerHTML = Object.entries(info.rules).map(([k, v]) => `<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join("")
+    || "<tr><td class='muted'>아직 없음</td></tr>";
+  $("version").innerHTML = versions.map((v) => `<option>${esc(v.name)}</option>`).join("");
+  $("version").onchange = showNote;
+  showNote();
+}
+
+function showNote() {
+  const v = versions.find((x) => x.name === $("version").value);
+  $("note").textContent = v ? v.note : "";
+}
+
+async function runOne(name) {
+  if (name) { $("version").value = name; showNote(); }
+  const r = await (await fetch(`/api/run/${$("version").value}`)).json();
+  $("result").innerHTML = renderResult(r);
+}
+
+async function compareAll() {
+  const results = await (await fetch("/api/compare")).json();
+  const names = [...new Set(results.flatMap((r) => Object.keys(r.metrics)))];
+  $("compareArea").innerHTML = `<h2>버전 비교 <span class="muted">(위반 적은 순, 행 클릭 → 상세)</span></h2><table>
+    <tr><th>버전</th><th>설명</th><th>규칙 위반</th>${names.map((n) => `<th>${esc(n)}</th>`).join("")}<th>ms</th></tr>
+    ${results.map((r) => `<tr class="click" onclick="runOne('${r.name}')"><td><b>${r.name}</b></td><td>${esc(r.note)}</td>
+      <td class="${r.error || r.violations.length ? "bad" : "ok"}">${r.error ? "에러" : r.violations.length}</td>
+      ${names.map((n) => `<td>${esc(r.metrics[n] ?? "-")}</td>`).join("")}<td>${r.ms}</td></tr>`).join("")}
+  </table>`;
+}
+
+function renderResult(r) {
+  if (r.error) return `<h2>${r.name} 결과</h2><div class="box">${esc(r.error)}</div>`;
+  const v = r.violations.length
+    ? `<ul class="bad">${r.violations.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>`
+    : `<p class="ok">✔ 규칙 위반 없음</p>`;
+  const m = Object.entries(r.metrics).map(([k, x]) => `<tr><th>${esc(k)}</th><td>${esc(x)}</td></tr>`).join("");
+  const t = r.table;
+  return `<h2>${r.name} 결과 <span class="muted">${esc(r.note)} · ${r.ms}ms</span></h2>
+    <h2>규칙 검사</h2>${v}
+    <h2>지표</h2><table>${m || "<tr><td class='muted'>지표 없음</td></tr>"}</table>
+    <h2>결과 표</h2><table><tr>${t.columns.map((c) => `<th>${esc(c)}</th>`).join("")}</tr>
+      ${t.rows.map((row) => `<tr>${row.map((c) => `<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</table>`;
+}
+
+init();
+</script>
+</body>
+</html>
